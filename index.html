@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Desejos - Login</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./styles/index.css">
+</head>
+
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="floating-stars" id="stars"></div>
+    <div class="login-container rounded-2xl shadow-2xl p-8 w-full max-w-md">
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-white bg-opacity-20 rounded-full mb-4">
+                <i class="fas fa-heart text-2xl text-white"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-white mb-2">Lista de Desejos</h1>
+            <p class="text-white text-opacity-80">Acesse sua lista pessoal de sonhos</p>
+        </div>
+
+        <form id="loginForm" class="space-y-6">
+            <div class="space-y-2">
+                <label for="username" class="block text-white text-sm font-medium">
+                    <i class="fas fa-user mr-2"></i>Usuário
+                </label>
+                <input type="text" id="username" name="username"
+                    class="input-glow w-full px-4 py-3 bg-white bg-opacity-20 border border-white border-opacity-30 rounded-lg text-white placeholder-white placeholder-opacity-70 focus:outline-none focus:border-opacity-50 transition-all duration-300"
+                    placeholder="Digite seu usuário" required>
+            </div>
+
+            <div class="space-y-2">
+                <label for="password" class="block text-white text-sm font-medium">
+                    <i class="fas fa-lock mr-2"></i>Senha
+                </label>
+                <div class="relative">
+                    <input type="password" id="password" name="password"
+                        class="input-glow w-full px-4 py-3 pr-12 bg-white bg-opacity-20 border border-white border-opacity-30 rounded-lg text-white placeholder-white placeholder-opacity-70 focus:outline-none focus:border-opacity-50 transition-all duration-300"
+                        placeholder="Digite sua senha" required>
+                    <button type="button" id="togglePassword"
+                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-white text-opacity-70 hover:text-opacity-100 transition-all">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="errorMessage" class="hidden bg-red-500 bg-opacity-80 text-white p-3 rounded-lg text-sm">
+                <i class="fas fa-exclamation-triangle mr-2"></i>
+                <span id="errorText"></span>
+            </div>
+
+            <button type="submit" id="loginBtn"
+                class="btn-gradient w-full py-3 px-6 text-white font-semibold rounded-lg focus:outline-none focus:ring-4 focus:ring-purple-300 focus:ring-opacity-50">
+                <i class="fas fa-sign-in-alt mr-2"></i>
+                <span id="loginBtnText">Entrar</span>
+            </button>
+        </form>
+
+        <div class="mt-6 p-4 bg-white bg-opacity-10 rounded-lg">
+            <h3 class="text-white text-sm font-medium mb-2">
+                <i class="fas fa-info-circle mr-2"></i>Credenciais de Demo:
+            </h3>
+            <p class="text-white text-opacity-80 text-xs">
+                <strong>Usuário:</strong> admin<br>
+                <strong>Senha:</strong> 123456
+            </p>
+        </div>
+    </div>
+
+    <script src="./js/index.js"></script>
+</body>
+
+</html>
