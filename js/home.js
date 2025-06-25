@@ -1,12 +1,9 @@
-
 let wishes = [];
 let editingWishId = null;
 let currentFilter = 'todos';
 let currentSearch = '';
 
-
 $(document).ready(function () {
-
     const session = JSON.parse(localStorage.getItem('currentSession'));
     if (!session || !session.isAuthenticated) {
         window.location.href = 'index.html';
@@ -18,8 +15,8 @@ $(document).ready(function () {
     createStars();
     loadWishes();
     setupEventListeners();
+    handleRouting();
 });
-
 
 function createStars() {
     const starsContainer = document.getElementById('stars');
@@ -36,7 +33,6 @@ function createStars() {
         starsContainer.appendChild(star);
     }
 }
-
 
 function setupEventListeners() {
     $('#searchInput').on('input', function () {
@@ -55,11 +51,9 @@ function setupEventListeners() {
     });
 }
 
-
 function generateId() {
     return 'wish_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 }
-
 
 function loadWishes() {
     const storedWishes = localStorage.getItem('wishes');
@@ -99,20 +93,16 @@ function loadWishes() {
     filterAndDisplayWishes();
 }
 
-
 function saveWishes() {
     localStorage.setItem('wishes', JSON.stringify(wishes));
 }
 
-
 function filterAndDisplayWishes() {
     let filteredWishes = wishes;
-
 
     if (currentFilter !== 'todos') {
         filteredWishes = filteredWishes.filter(wish => wish.status === currentFilter);
     }
-
 
     if (currentSearch) {
         filteredWishes = filteredWishes.filter(wish =>
@@ -124,7 +114,6 @@ function filterAndDisplayWishes() {
     displayWishes(filteredWishes);
     saveWishes();
 }
-
 
 function displayWishes(wishesToDisplay) {
     const container = $('#wishesContainer');
@@ -139,62 +128,61 @@ function displayWishes(wishesToDisplay) {
     emptyState.addClass('hidden');
 
     const wishesHtml = wishesToDisplay.map(wish => `
-                <div class="glass-card rounded-2xl p-6 mb-4 slide-in priority-${wish.priority} transition-all duration-300">
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="flex-1">
-                            <h3 class="text-xl font-semibold text-white mb-2">${wish.title}</h3>
-                            <p class="text-white text-opacity-80 text-sm mb-3">${wish.description || 'Sem descrição'}</p>
-                            
-                            <div class="flex items-center space-x-3 mb-3">
-                                <span class="status-badge status-${wish.status}">
-                                    <i class="fas fa-circle mr-1" style="font-size: 0.5rem;"></i>
-                                    ${getStatusText(wish.status)}
-                                </span>
-                                <span class="text-white text-opacity-60 text-xs">
-                                    <i class="fas fa-flag mr-1"></i>
-                                    ${getPriorityText(wish.priority)}
-                                </span>
-                            </div>
-
-                            <div class="text-white text-opacity-50 text-xs">
-                                Criado em ${formatDate(wish.createdAt)}
-                                ${wish.updatedAt > wish.createdAt ? ` • Atualizado em ${formatDate(wish.updatedAt)}` : ''}
-                            </div>
-                        </div>
-
-                        <div class="flex flex-col space-y-2 ml-4">
-                            <button onclick="shareWish('${wish.id}')" class="p-2 bg-white bg-opacity-10 hover:bg-opacity-20 rounded-lg text-white text-opacity-70 hover:text-opacity-100 transition-all" title="Compartilhar">
-                                <i class="fas fa-share-alt text-sm"></i>
-                            </button>
-                            <button onclick="editWish('${wish.id}')" class="p-2 bg-white bg-opacity-10 hover:bg-opacity-20 rounded-lg text-white text-opacity-70 hover:text-opacity-100 transition-all" title="Editar">
-                                <i class="fas fa-edit text-sm"></i>
-                            </button>
-                            <button onclick="deleteWish('${wish.id}')" class="p-2 bg-red-500 bg-opacity-20 hover:bg-opacity-30 rounded-lg text-red-400 hover:text-red-300 transition-all" title="Excluir">
-                                <i class="fas fa-trash text-sm"></i>
-                            </button>
-                        </div>
+        <div class="glass-card rounded-2xl p-6 mb-4 slide-in priority-${wish.priority} transition-all duration-300">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex-1">
+                    <h3 class="text-xl font-semibold text-white mb-2">${wish.title}</h3>
+                    <p class="text-white text-opacity-80 text-sm mb-3">${wish.description || 'Sem descrição'}</p>
+                    
+                    <div class="flex items-center space-x-3 mb-3">
+                        <span class="status-badge status-${wish.status}">
+                            <i class="fas fa-circle mr-1" style="font-size: 0.5rem;"></i>
+                            ${getStatusText(wish.status)}
+                        </span>
+                        <span class="text-white text-opacity-60 text-xs">
+                            <i class="fas fa-flag mr-1"></i>
+                            ${getPriorityText(wish.priority)}
+                        </span>
                     </div>
 
-                    <div class="flex flex-wrap gap-2">
-                        <button onclick="updateStatus('${wish.id}', 'pendente')" class="px-3 py-1 text-xs rounded-full ${wish.status === 'pendente' ? 'bg-yellow-500 bg-opacity-30 text-yellow-300' : 'bg-white bg-opacity-10 text-white text-opacity-60'} hover:bg-opacity-20 transition-all">
-                            Pendente
-                        </button>
-                        <button onclick="updateStatus('${wish.id}', 'em-andamento')" class="px-3 py-1 text-xs rounded-full ${wish.status === 'em-andamento' ? 'bg-blue-500 bg-opacity-30 text-blue-300' : 'bg-white bg-opacity-10 text-white text-opacity-60'} hover:bg-opacity-20 transition-all">
-                            Em Andamento
-                        </button>
-                        <button onclick="updateStatus('${wish.id}', 'realizado')" class="px-3 py-1 text-xs rounded-full ${wish.status === 'realizado' ? 'bg-green-500 bg-opacity-30 text-green-300' : 'bg-white bg-opacity-10 text-white text-opacity-60'} hover:bg-opacity-20 transition-all">
-                            Realizado
-                        </button>
-                        <button onclick="updateStatus('${wish.id}', 'cancelado')" class="px-3 py-1 text-xs rounded-full ${wish.status === 'cancelado' ? 'bg-red-500 bg-opacity-30 text-red-300' : 'bg-white bg-opacity-10 text-white text-opacity-60'} hover:bg-opacity-20 transition-all">
-                            Cancelado
-                        </button>
+                    <div class="text-white text-opacity-50 text-xs">
+                        Criado em ${formatDate(wish.createdAt)}
+                        ${wish.updatedAt > wish.createdAt ? ` • Atualizado em ${formatDate(wish.updatedAt)}` : ''}
                     </div>
                 </div>
-            `).join('');
+
+                <div class="flex flex-col space-y-2 ml-4">
+                    <button onclick="shareWish('${wish.id}')" class="p-2 bg-white bg-opacity-10 hover:bg-opacity-20 rounded-lg text-white text-opacity-70 hover:text-opacity-100 transition-all" title="Compartilhar">
+                        <i class="fas fa-share-alt text-sm"></i>
+                    </button>
+                    <button onclick="editWish('${wish.id}')" class="p-2 bg-white bg-opacity-10 hover:bg-opacity-20 rounded-lg text-white text-opacity-70 hover:text-opacity-100 transition-all" title="Editar">
+                        <i class="fas fa-edit text-sm"></i>
+                    </button>
+                    <button onclick="deleteWish('${wish.id}')" class="p-2 bg-red-500 bg-opacity-20 hover:bg-opacity-30 rounded-lg text-red-400 hover:text-red-300 transition-all" title="Excluir">
+                        <i class="fas fa-trash text-sm"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+                <button onclick="updateStatus('${wish.id}', 'pendente')" class="px-3 py-1 text-xs rounded-full ${wish.status === 'pendente' ? 'bg-yellow-500 bg-opacity-30 text-yellow-300' : 'bg-white bg-opacity-10 text-white text-opacity-60'} hover:bg-opacity-20 transition-all">
+                    Pendente
+                </button>
+                <button onclick="updateStatus('${wish.id}', 'em-andamento')" class="px-3 py-1 text-xs rounded-full ${wish.status === 'em-andamento' ? 'bg-blue-500 bg-opacity-30 text-blue-300' : 'bg-white bg-opacity-10 text-white text-opacity-60'} hover:bg-opacity-20 transition-all">
+                    Em Andamento
+                </button>
+                <button onclick="updateStatus('${wish.id}', 'realizado')" class="px-3 py-1 text-xs rounded-full ${wish.status === 'realizado' ? 'bg-green-500 bg-opacity-30 text-green-300' : 'bg-white bg-opacity-10 text-white text-opacity-60'} hover:bg-opacity-20 transition-all">
+                    Realizado
+                </button>
+                <button onclick="updateStatus('${wish.id}', 'cancelado')" class="px-3 py-1 text-xs rounded-full ${wish.status === 'cancelado' ? 'bg-red-500 bg-opacity-30 text-red-300' : 'bg-white bg-opacity-10 text-white text-opacity-60'} hover:bg-opacity-20 transition-all">
+                    Cancelado
+                </button>
+            </div>
+        </div>
+    `).join('');
 
     container.html(wishesHtml);
 }
-
 
 function getStatusText(status) {
     const statusMap = {
@@ -218,7 +206,6 @@ function getPriorityText(priority) {
 function formatDate(date) {
     return new Date(date).toLocaleDateString('pt-BR');
 }
-
 
 function openAddModal() {
     editingWishId = null;
@@ -265,7 +252,6 @@ function saveWish() {
     }
 
     if (editingWishId) {
-
         const wishIndex = wishes.findIndex(w => w.id === editingWishId);
         if (wishIndex !== -1) {
             wishes[wishIndex] = {
@@ -278,7 +264,6 @@ function saveWish() {
             };
         }
     } else {
-
         const newWish = {
             id: generateId(),
             title,
@@ -295,7 +280,6 @@ function saveWish() {
     closeModal();
 }
 
-
 function updateStatus(id, newStatus) {
     const wishIndex = wishes.findIndex(w => w.id === id);
     if (wishIndex !== -1) {
@@ -305,7 +289,6 @@ function updateStatus(id, newStatus) {
     }
 }
 
-
 function deleteWish(id) {
     if (confirm('Tem certeza que deseja excluir este desejo?')) {
         wishes = wishes.filter(w => w.id !== id);
@@ -313,18 +296,17 @@ function deleteWish(id) {
     }
 }
 
-
 function shareWish(id) {
     const wish = wishes.find(w => w.id === id);
     if (!wish) return;
 
-    const shareUrl = `${window.location.origin}/wish/${id}`;
+    const shareUrl = `${window.location.origin}${window.location.pathname}#/wish/${id}`;
     $('#shareLink').val(shareUrl);
     $('#shareModal').removeClass('hidden').addClass('flex');
 }
 
 function shareList() {
-    const shareUrl = `${window.location.origin}/list/shared`;
+    const shareUrl = `${window.location.origin}${window.location.pathname}#/list/shared`;
     $('#shareLink').val(shareUrl);
     $('#shareModal').removeClass('hidden').addClass('flex');
 }
@@ -340,7 +322,6 @@ function copyShareLink() {
 
     try {
         document.execCommand('copy');
-
 
         const button = event.target.closest('button');
         const originalHtml = button.innerHTML;
@@ -360,7 +341,6 @@ function copyShareLink() {
     }
 }
 
-
 function logout() {
     if (confirm('Tem certeza que deseja sair?')) {
         localStorage.removeItem('currentSession');
@@ -368,84 +348,262 @@ function logout() {
     }
 }
 
-
 function handleRouting() {
-    const path = window.location.pathname;
-    const wishMatch = path.match(/\/wish\/(.+)/);
-
+    const hash = window.location.hash;
+    
+    const wishMatch = hash.match(/#\/wish\/(.+)/);
+    
     if (wishMatch) {
         const wishId = wishMatch[1];
         showSharedWish(wishId);
+        return;
+    }
+    
+    const listMatch = hash.match(/#\/list\/shared/);
+    if (listMatch) {
+        showSharedList();
+        return;
     }
 }
 
 function showSharedWish(wishId) {
-    const wish = wishes.find(w => w.id === wishId);
+    const storedWishes = localStorage.getItem('wishes');
+    let allWishes = [];
+    
+    if (storedWishes) {
+        allWishes = JSON.parse(storedWishes);
+    }
+    
+    const wish = allWishes.find(w => w.id === wishId);
+    
     if (!wish) {
-        alert('Desejo não encontrado.');
+        showWishNotFound();
         return;
     }
 
-
     const modalHtml = `
-                <div id="sharedWishModal" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50 p-4">
-                    <div class="glass-card rounded-2xl p-6 w-full max-w-md">
-                        <div class="flex items-center justify-between mb-6">
-                            <h2 class="text-xl font-bold text-white">Desejo Compartilhado</h2>
-                            <button onclick="closeSharedWish()" class="text-white text-opacity-70 hover:text-opacity-100 transition-all">
-                                <i class="fas fa-times text-xl"></i>
-                            </button>
+        <div id="sharedWishModal" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50 p-4">
+            <div class="glass-card rounded-2xl p-6 w-full max-w-md">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold text-white">
+                        <i class="fas fa-share-alt mr-2"></i>Desejo Compartilhado
+                    </h2>
+                    <button onclick="closeSharedWish()" class="text-white text-opacity-70 hover:text-opacity-100 transition-all">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="text-center mb-4">
+                        <div class="inline-flex items-center justify-center w-12 h-12 bg-white bg-opacity-20 rounded-full mb-3">
+                            <i class="fas fa-star text-xl text-white"></i>
                         </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-lg font-semibold text-white mb-2">${wish.title}</h3>
+                        <p class="text-white text-opacity-80 text-sm mb-4">${wish.description || 'Sem descrição'}</p>
+                    </div>
 
-                        <div class="space-y-4">
-                            <div>
-                                <h3 class="text-lg font-semibold text-white mb-2">${wish.title}</h3>
-                                <p class="text-white text-opacity-80 text-sm mb-4">${wish.description || 'Sem descrição'}</p>
-                            </div>
+                    <div class="flex items-center justify-center space-x-4 mb-4">
+                        <span class="status-badge status-${wish.status}">
+                            <i class="fas fa-circle mr-1" style="font-size: 0.5rem;"></i>
+                            ${getStatusText(wish.status)}
+                        </span>
+                        <span class="text-white text-opacity-60 text-xs px-3 py-1 bg-white bg-opacity-10 rounded-full">
+                            <i class="fas fa-flag mr-1"></i>
+                            ${getPriorityText(wish.priority)}
+                        </span>
+                    </div>
 
-                            <div class="flex items-center space-x-3 mb-4">
-                                <span class="status-badge status-${wish.status}">
-                                    <i class="fas fa-circle mr-1" style="font-size: 0.5rem;"></i>
-                                    ${getStatusText(wish.status)}
-                                </span>
-                                <span class="text-white text-opacity-60 text-xs">
-                                    <i class="fas fa-flag mr-1"></i>
-                                    ${getPriorityText(wish.priority)}
-                                </span>
-                            </div>
+                    <div class="text-center text-white text-opacity-50 text-xs mb-4">
+                        <div>Criado em ${formatDate(wish.createdAt)}</div>
+                        ${wish.updatedAt > wish.createdAt ? `<div>Atualizado em ${formatDate(wish.updatedAt)}</div>` : ''}
+                    </div>
 
-                            <div class="text-white text-opacity-50 text-xs">
-                                Criado em ${formatDate(wish.createdAt)}
-                                ${wish.updatedAt > wish.createdAt ? ` • Atualizado em ${formatDate(wish.updatedAt)}` : ''}
-                            </div>
-
-                            <div class="pt-4 border-t border-white border-opacity-20">
-                                <p class="text-white text-opacity-60 text-xs text-center">
-                                    Este é um link de visualização. Você está vendo os detalhes deste desejo em modo somente leitura.
-                                </p>
-                            </div>
+                    <div class="pt-4 border-t border-white border-opacity-20">
+                        <div class="flex items-center justify-center space-x-2 mb-3">
+                            <i class="fas fa-eye text-white text-opacity-60"></i>
+                            <p class="text-white text-opacity-60 text-xs">
+                                Visualização somente leitura
+                            </p>
+                        </div>
+                        
+                        <div class="flex space-x-2">
+                            <button onclick="copyCurrentUrl()" class="flex-1 px-4 py-2 bg-white bg-opacity-10 hover:bg-opacity-20 rounded-lg text-white text-sm transition-all">
+                                <i class="fas fa-copy mr-2"></i>Copiar Link
+                            </button>
+                            <button onclick="closeSharedWish()" class="flex-1 px-4 py-2 btn-gradient rounded-lg text-white text-sm">
+                                <i class="fas fa-check mr-2"></i>Entendi
+                            </button>
                         </div>
                     </div>
                 </div>
-            `;
+            </div>
+        </div>
+    `;
+
+    $('body').append(modalHtml);
+}
+
+function showWishNotFound() {
+    const modalHtml = `
+        <div id="sharedWishModal" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50 p-4">
+            <div class="glass-card rounded-2xl p-6 w-full max-w-md text-center">
+                <div class="mb-6">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-red-500 bg-opacity-20 rounded-full mb-4">
+                        <i class="fas fa-exclamation-triangle text-2xl text-red-400"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-white mb-2">Desejo Não Encontrado</h2>
+                    <p class="text-white text-opacity-70 text-sm">
+                        Este desejo pode ter sido removido ou o link está incorreto.
+                    </p>
+                </div>
+                
+                <div class="space-y-3">
+                    <button onclick="goToHome()" class="w-full px-4 py-3 btn-gradient rounded-lg text-white font-semibold">
+                        <i class="fas fa-home mr-2"></i>Ir para Lista Principal
+                    </button>
+                    <button onclick="closeSharedWish()" class="w-full px-4 py-3 bg-white bg-opacity-10 hover:bg-opacity-20 rounded-lg text-white transition-all">
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    $('body').append(modalHtml);
+}
+
+function showSharedList() {
+    const storedWishes = localStorage.getItem('wishes');
+    let allWishes = [];
+    
+    if (storedWishes) {
+        allWishes = JSON.parse(storedWishes);
+    }
+
+    const modalHtml = `
+        <div id="sharedWishModal" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50 p-4">
+            <div class="glass-card rounded-2xl p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold text-white">
+                        <i class="fas fa-list mr-2"></i>Lista de Desejos Compartilhada
+                    </h2>
+                    <button onclick="closeSharedWish()" class="text-white text-opacity-70 hover:text-opacity-100 transition-all">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    ${allWishes.length > 0 ? 
+                        allWishes.map(wish => `
+                            <div class="glass-card rounded-xl p-4 border border-white border-opacity-10">
+                                <h3 class="text-lg font-semibold text-white mb-2">${wish.title}</h3>
+                                <p class="text-white text-opacity-80 text-sm mb-3">${wish.description || 'Sem descrição'}</p>
+                                
+                                <div class="flex items-center space-x-3">
+                                    <span class="status-badge status-${wish.status}">
+                                        <i class="fas fa-circle mr-1" style="font-size: 0.5rem;"></i>
+                                        ${getStatusText(wish.status)}
+                                    </span>
+                                    <span class="text-white text-opacity-60 text-xs">
+                                        <i class="fas fa-flag mr-1"></i>
+                                        ${getPriorityText(wish.priority)}
+                                    </span>
+                                </div>
+                            </div>
+                        `).join('') 
+                        : 
+                        `<div class="text-center py-8">
+                            <i class="fas fa-inbox text-4xl text-white text-opacity-30 mb-4"></i>
+                            <p class="text-white text-opacity-60">Nenhum desejo encontrado</p>
+                        </div>`
+                    }
+                </div>
+                
+                <div class="pt-4 border-t border-white border-opacity-20 mt-6">
+                    <div class="flex space-x-2">
+                        <button onclick="copyCurrentUrl()" class="flex-1 px-4 py-2 bg-white bg-opacity-10 hover:bg-opacity-20 rounded-lg text-white text-sm transition-all">
+                            <i class="fas fa-copy mr-2"></i>Copiar Link
+                        </button>
+                        <button onclick="closeSharedWish()" class="flex-1 px-4 py-2 btn-gradient rounded-lg text-white text-sm">
+                            Fechar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
 
     $('body').append(modalHtml);
 }
 
 function closeSharedWish() {
     $('#sharedWishModal').remove();
-
-    history.pushState({}, '', '/');
+    history.pushState("", document.title, window.location.pathname + window.location.search);
 }
 
+function copyCurrentUrl() {
+    const currentUrl = window.location.href;
+    
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(currentUrl).then(() => {
+            showCopySuccess();
+        }).catch(() => {
+            fallbackCopyTextToClipboard(currentUrl);
+        });
+    } else {
+        fallbackCopyTextToClipboard(currentUrl);
+    }
+}
 
-$(document).ready(function () {
-    handleRouting();
-});
+function fallbackCopyTextToClipboard(text) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.position = "fixed";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+        document.execCommand('copy');
+        showCopySuccess();
+    } catch (err) {
+        console.error('Erro ao copiar:', err);
+    }
+    
+    document.body.removeChild(textArea);
+}
 
+function showCopySuccess() {
+    const toast = $(`
+        <div class="fixed top-4 right-4 z-50 bg-green-500 bg-opacity-90 text-white px-4 py-2 rounded-lg shadow-lg">
+            <i class="fas fa-check mr-2"></i>Link copiado!
+        </div>
+    `);
+    
+    $('body').append(toast);
+    
+    setTimeout(() => {
+        toast.fadeOut(300, function() {
+            $(this).remove();
+        });
+    }, 2000);
+}
 
+function goToHome() {
+    closeSharedWish();
+    const session = JSON.parse(localStorage.getItem('currentSession') || '{}');
+    if (!session.isAuthenticated) {
+        window.location.href = 'index.html';
+    }
+}
+
+window.addEventListener('hashchange', handleRouting);
 window.addEventListener('popstate', handleRouting);
-
 
 window.getWishes = () => wishes;
 window.addSampleWishes = () => {
@@ -484,9 +642,7 @@ window.addSampleWishes = () => {
     console.log('Desejos de exemplo adicionados!');
 };
 
-
 $(document).keydown(function (e) {
-
     if (e.key === 'Escape') {
         if (!$('#wishModal').hasClass('hidden')) {
             closeModal();
@@ -499,12 +655,10 @@ $(document).keydown(function (e) {
         }
     }
 
-
     if (e.ctrlKey && e.key === 'n') {
         e.preventDefault();
         openAddModal();
     }
-
 
     if (e.ctrlKey && e.key === 'f') {
         e.preventDefault();
@@ -512,9 +666,7 @@ $(document).keydown(function (e) {
     }
 });
 
-
 $(document).on('click', '.glass-card', function (e) {
-
     const ripple = $('<div class="absolute rounded-full bg-white opacity-25 animate-ping"></div>');
     const rect = this.getBoundingClientRect();
     const size = 50;
@@ -537,7 +689,6 @@ $(document).on('click', '.glass-card', function (e) {
     }, 600);
 });
 
-
 let autoSaveTimeout;
 function scheduleAutoSave() {
     clearTimeout(autoSaveTimeout);
@@ -546,7 +697,6 @@ function scheduleAutoSave() {
         console.log('Auto-salvando desejos...', wishes.length, 'itens');
     }, 2000);
 }
-
 
 const originalFilterAndDisplayWishes = filterAndDisplayWishes;
 filterAndDisplayWishes = function () {
